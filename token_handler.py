@@ -40,7 +40,7 @@ class users(adb.Model):
      u_id = adb.Column(adb.Integer, primary_key=True)
      public_id = adb.Column(adb.Integer)
      u_name = adb.Column(adb.String(50))
-     u_password = adb.Column(adb.String(50))
+     u_password = adb.Column(adb.String)
      u_admin = adb.Column(adb.Boolean)
 
 # token bit - checking token from headers
@@ -93,10 +93,9 @@ def login_user():
         return make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "login required"'})    
 
     user = users.query.filter_by(u_name=auth.username).first()   
-     
-    if check_password_hash(user.u_password, auth.password):  
+
+    if check_password_hash(user.u_password, str(auth.password)): 
         token = jwt.encode({'public_id': user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'],algorithm="HS256")  
-        #return jsonify({'token' : token.decode('UTF-8')})
         return jsonify({'token' : token})
 
     return make_response('could not verify',  401, {'WWW.Authentication': 'Basic realm: "login required"'})
